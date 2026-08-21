@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if mode == 'edit' else 'Add' }} Product{% endblock %}
+{% block page_title %}{{ 'Edit' if mode == 'edit' else 'Add New' }} Product{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('products.list_products') }}">Products</a></li>
+        <li class="breadcrumb-item active">{{ 'Edit' if mode == 'edit' else 'Add New' }} Product</li>
+    </ol>
+</nav>
+
+<!-- Form Card -->
+<div class="content-card">
+    <div class="content-card-header">
+        <h5>
+            <i class="bi bi-{% if mode == 'edit' %}pencil-square{% else %}plus-circle{% endif %} me-2"></i>
+            {{ 'Edit Product' if mode == 'edit' else 'New Product' }}
+        </h5>
+    </div>
+    <div class="content-card-body p-4">
+        <form method="POST" novalidate>
+            <div class="row g-3">
+                <!-- Product Name -->
+                <div class="col-md-6">
+                    <label for="name" class="form-label">
+                        Product Name <span class="text-danger">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="name"
+                        name="name"
+                        value="{{ product.name if product else '' }}"
+                        placeholder="e.g., Wireless Keyboard"
+                        required
+                        autofocus
+                    >
+                    <div class="form-text">The display name for this product.</div>
+                </div>
+
+                <!-- SKU -->
+                <div class="col-md-6">
+                    <label for="sku" class="form-label">
+                        SKU <span class="text-danger">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="sku"
+                        name="sku"
+                        value="{{ product.sku if product else '' }}"
+                        placeholder="e.g., KB-WL-001"
+                        required
+                    >
+                    <div class="form-text">Unique stock keeping unit identifier.</div>
+                </div>
+
+                <!-- Category -->
+                <div class="col-md-4">
+                    <label for="category" class="form-label">Category</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="category"
+                        name="category"
+                        value="{{ product.category if product and product.category else '' }}"
+                        placeholder="e.g., Electronics"
+                        list="categoryList"
+                    >
+                    <datalist id="categoryList">
+                        <!-- Common categories — these will be populated dynamically later -->
+                        <option value="Electronics">
+                        <option value="Raw Materials">
+                        <option value="Packaging">
+                        <option value="Office Supplies">
+                        <option value="Hardware">
+                        <option value="Food & Beverage">
+                        <option value="Clothing">
+                        <option value="Furniture">
+                    </datalist>
+                    <div class="form-text">Group similar products together.</div>
+                </div>
+
+                <!-- Unit Price -->
+                <div class="col-md-4">
+                    <label for="unit_price" class="form-label">
+                        Unit Price ($)
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="unit_price"
+                            name="unit_price"
+                            value="{{ product.unit_price if product else '0.00' }}"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                        >
+                    </div>
+                    <div class="form-text">Cost per unit.</div>
+                </div>
+
+                <!-- Unit of Measurement -->
+                <div class="col-md-4">
+                    <label for="unit" class="form-label">Unit</label>
+                    <select class="form-select" id="unit" name="unit">
+                        {% set current_unit = product.unit if product else 'pcs' %}
+                        <option value="pcs" {% if current_unit == 'pcs' %}selected{% endif %}>Pieces (pcs)</option>
+                        <option value="kg" {% if current_unit == 'kg' %}selected{% endif %}>Kilograms (kg)</option>
+                        <option value="g" {% if current_unit == 'g' %}selected{% endif %}>Grams (g)</option>
+                        <option value="ltr" {% if current_unit == 'ltr' %}selected{% endif %}>Litres (ltr)</option>
+                        <option value="ml" {% if current_unit == 'ml' %}selected{% endif %}>Millilitres (ml)</option>
+                        <option value="box" {% if current_unit == 'box' %}selected{% endif %}>Boxes (box)</option>
+                        <option value="pack" {% if current_unit == 'pack' %}selected{% endif %}>Packs (pack)</option>
+                        <option value="set" {% if current_unit == 'set' %}selected{% endif %}>Sets (set)</option>
+                        <option value="m" {% if current_unit == 'm' %}selected{% endif %}>Metres (m)</option>
+                        <option value="ft" {% if current_unit == 'ft' %}selected{% endif %}>Feet (ft)</option>
+                    </select>
+                    <div class="form-text">How this product is measured.</div>
+                </div>
+
+                <!-- Description -->
+                <div class="col-12">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea
+                        class="form-control"
+                        id="description"
+                        name="description"
+                        rows="3"
+                        placeholder="Optional product description or notes..."
+                    >{{ product.description if product and product.description else '' }}</textarea>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="col-12">
+                    <hr class="my-3">
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-action">
+                            <i class="bi bi-check-lg me-2"></i>
+                            {{ 'Update Product' if mode == 'edit' else 'Create Product' }}
+                        </button>
+                        <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

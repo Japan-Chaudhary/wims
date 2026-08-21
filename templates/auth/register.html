@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content_auth %}
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- Logo / Brand -->
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <h2>Create Account</h2>
+            <p class="text-muted">Register for a new WIMS account</p>
+        </div>
+
+        <!-- Registration Form -->
+        <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+            <!-- Username -->
+            <div class="mb-3">
+                <label for="username" class="form-label">
+                    <i class="bi bi-person me-1"></i>Username
+                </label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username (min 3 chars)"
+                    required
+                    autofocus
+                    minlength="3"
+                >
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label for="email" class="form-label">
+                    <i class="bi bi-envelope me-1"></i>Email
+                </label>
+                <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email address"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label">
+                    <i class="bi bi-lock me-1"></i>Password
+                </label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password (min 6 chars)"
+                        required
+                        minlength="6"
+                    >
+                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">
+                    <i class="bi bi-lock-fill me-1"></i>Confirm Password
+                </label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        class="form-control"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Repeat your password"
+                        required
+                    >
+                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="confirm_password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-primary w-100 auth-btn">
+                <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+        </form>
+
+        <!-- Login Link -->
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

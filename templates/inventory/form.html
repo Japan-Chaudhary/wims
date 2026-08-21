@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Thresholds' if mode == 'edit' else 'Assign Product to Warehouse' }}{% endblock %}
+{% block page_title %}{{ 'Edit Inventory Thresholds' if mode == 'edit' else 'Assign Product to Warehouse' }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('inventory.list_inventory') }}">Inventory</a></li>
+        <li class="breadcrumb-item active">{{ 'Edit Thresholds' if mode == 'edit' else 'Assign Product' }}</li>
+    </ol>
+</nav>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <h5>
+            <i class="bi bi-{% if mode == 'edit' %}sliders{% else %}plus-circle{% endif %} me-2"></i>
+            {{ 'Edit Inventory Thresholds' if mode == 'edit' else 'Assign Product to Warehouse' }}
+        </h5>
+    </div>
+    <div class="content-card-body p-4">
+        <form method="POST" novalidate>
+            <div class="row g-3">
+                {% if mode == 'add' %}
+                <!-- Select Warehouse -->
+                <div class="col-md-6">
+                    <label for="warehouse_id" class="form-label">
+                        Warehouse <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="warehouse_id" name="warehouse_id" required>
+                        <option value="">-- Select Warehouse --</option>
+                        {% for wh in warehouses %}
+                        <option value="{{ wh.id }}">{{ wh.name }} ({{ wh.location or 'No Location' }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Select Product -->
+                <div class="col-md-6">
+                    <label for="product_id" class="form-label">
+                        Product <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="product_id" name="product_id" required>
+                        <option value="">-- Select Product --</option>
+                        {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }} (SKU: {{ p.sku }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Initial Quantity -->
+                <div class="col-md-4">
+                    <label for="quantity" class="form-label">Initial Quantity</label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        id="quantity"
+                        name="quantity"
+                        value="0"
+                        min="0"
+                    >
+                    <div class="form-text">Initial stock quantity to log upon setup.</div>
+                </div>
+                {% else %}
+                <!-- Display Product & Warehouse Info in Edit Mode -->
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Product</label>
+                    <div class="form-control bg-light fw-bold">
+                        {{ inventory.product.name }} (SKU: {{ inventory.product.sku }})
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Warehouse</label>
+                    <div class="form-control bg-light fw-bold">
+                        {{ inventory.warehouse.name }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label text-muted">Current Quantity</label>
+                    <div class="form-control bg-light fw-bold text-primary">
+                        {{ inventory.quantity }} {{ inventory.product.unit }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Min Stock Threshold -->
+                <div class="col-md-4">
+                    <label for="min_stock" class="form-label">Min Stock Alert Level</label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        id="min_stock"
+                        name="min_stock"
+                        value="{{ inventory.min_stock if inventory else 10 }}"
+                        min="0"
+                    >
+                    <div class="form-text">Triggers a Low Stock warning when stock drops to or below this.</div>
+                </div>
+
+                <!-- Max Stock Threshold -->
+                <div class="col-md-4">
+                    <label for="max_stock" class="form-label">Max Capacity Threshold</label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        id="max_stock"
+                        name="max_stock"
+                        value="{{ inventory.max_stock if inventory else 0 }}"
+                        min="0"
+                        placeholder="0 for unconstrained"
+                    >
+                    <div class="form-text">Maximum recommended stock level for this item in this warehouse.</div>
+                </div>
+
+                <div class="col-12">
+                    <hr class="my-3">
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-action">
+                            <i class="bi bi-check-lg me-2"></i>
+                            {{ 'Save Thresholds' if mode == 'edit' else 'Assign Product' }}
+                        </button>
+                        <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

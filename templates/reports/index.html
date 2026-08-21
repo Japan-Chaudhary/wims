@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports & Analytics Hub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Reports Hub</h2>
+        <p class="text-muted mb-0">Generate inventory metrics, stock valuation, and reorder reports</p>
+    </div>
+</div>
+
+<!-- Report Navigation Cards -->
+<div class="row g-4 mb-4">
+    <!-- Valuation Report -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="p-3 bg-primary-subtle text-primary rounded-3 align-self-start mb-3">
+                    <i class="bi bi-currency-dollar fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Inventory Valuation</h5>
+                <p class="text-muted small mb-4 flex-grow-1">
+                    Calculate total monetary value of current stock across all active warehouse locations.
+                </p>
+                <div class="mb-3">
+                    <span class="small text-muted d-block">Current Total Valuation:</span>
+                    <span class="fs-4 fw-bold text-primary">${{ '%.2f' | format(total_valuation) }}</span>
+                </div>
+                <a href="{{ url_for('reports.inventory_value') }}" class="btn btn-primary w-100">
+                    View Valuation Report <i class="bi bi-arrow-right me-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Reorder Report -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="p-3 bg-danger-subtle text-danger rounded-3 align-self-start mb-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Low Stock & Reorders</h5>
+                <p class="text-muted small mb-4 flex-grow-1">
+                    Identify critical stock levels falling below minimum thresholds and calculate reorder requirements.
+                </p>
+                <div class="mb-3">
+                    <span class="small text-muted d-block">Items Needing Reorder:</span>
+                    <span class="fs-4 fw-bold text-danger">{{ low_stock_count }} items</span>
+                </div>
+                <a href="{{ url_for('reports.low_stock') }}" class="btn btn-outline-danger w-100">
+                    View Reorder Report <i class="bi bi-arrow-right me-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Movement Summary -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="p-3 bg-success-subtle text-success rounded-3 align-self-start mb-3">
+                    <i class="bi bi-arrow-left-right fs-3"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Stock Movement Summary</h5>
+                <p class="text-muted small mb-4 flex-grow-1">
+                    Analyze inbound vs outbound transaction trends and overall operational activity over time.
+                </p>
+                <div class="mb-3">
+                    <span class="small text-muted d-block">Total Logged Movements:</span>
+                    <span class="fs-4 fw-bold text-dark">{{ total_movements }} transactions</span>
+                </div>
+                <a href="{{ url_for('reports.stock_movement') }}" class="btn btn-outline-success w-100">
+                    View Movement Report <i class="bi bi-arrow-right me-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

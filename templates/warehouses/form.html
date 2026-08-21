@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if mode == 'edit' else 'Add' }} Warehouse{% endblock %}
+{% block page_title %}{{ 'Edit' if mode == 'edit' else 'Add New' }} Warehouse{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('warehouses.list_warehouses') }}">Warehouses</a></li>
+        <li class="breadcrumb-item active">{{ 'Edit' if mode == 'edit' else 'Add New' }} Warehouse</li>
+    </ol>
+</nav>
+
+<!-- Form Card -->
+<div class="content-card">
+    <div class="content-card-header">
+        <h5>
+            <i class="bi bi-{% if mode == 'edit' %}pencil-square{% else %}building-add{% endif %} me-2"></i>
+            {{ 'Edit Warehouse' if mode == 'edit' else 'New Warehouse' }}
+        </h5>
+    </div>
+    <div class="content-card-body p-4">
+        <form method="POST" novalidate>
+            <div class="row g-3">
+                <!-- Warehouse Name -->
+                <div class="col-md-6">
+                    <label for="name" class="form-label">
+                        Warehouse Name <span class="text-danger">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="name"
+                        name="name"
+                        value="{{ warehouse.name if warehouse else '' }}"
+                        placeholder="e.g., Central Distribution Center"
+                        required
+                        autofocus
+                    >
+                    <div class="form-text">Unique name for this warehouse facility.</div>
+                </div>
+
+                <!-- Location -->
+                <div class="col-md-6">
+                    <label for="location" class="form-label">Location / Address</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="location"
+                        name="location"
+                        value="{{ warehouse.location if warehouse and warehouse.location else '' }}"
+                        placeholder="e.g., Sector 62, Noida, UP"
+                    >
+                    <div class="form-text">Physical location or address details.</div>
+                </div>
+
+                <!-- Capacity -->
+                <div class="col-md-6">
+                    <label for="capacity" class="form-label">Storage Capacity (Units)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                        <input
+                            type="number"
+                            class="form-control"
+                            id="capacity"
+                            name="capacity"
+                            value="{{ warehouse.capacity if warehouse else 0 }}"
+                            min="0"
+                            placeholder="0 for unlimited"
+                        >
+                    </div>
+                    <div class="form-text">Maximum storage capacity in total units (set 0 for unconstrained).</div>
+                </div>
+
+                <!-- Description -->
+                <div class="col-12">
+                    <label for="description" class="form-label">Description / Notes</label>
+                    <textarea
+                        class="form-control"
+                        id="description"
+                        name="description"
+                        rows="3"
+                        placeholder="Optional details, contact numbers, operating hours, etc."
+                    >{{ warehouse.description if warehouse and warehouse.description else '' }}</textarea>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="col-12">
+                    <hr class="my-3">
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-action">
+                            <i class="bi bi-check-lg me-2"></i>
+                            {{ 'Update Warehouse' if mode == 'edit' else 'Create Warehouse' }}
+                        </button>
+                        <a href="{{ url_for('warehouses.list_warehouses') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

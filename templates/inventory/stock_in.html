@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Stock In{% endblock %}
+{% block page_title %}Stock In Movement{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('inventory.list_inventory') }}">Inventory</a></li>
+        <li class="breadcrumb-item active">Stock In</li>
+    </ol>
+</nav>
+
+<div class="content-card">
+    <div class="content-card-header bg-success-subtle">
+        <h5 class="text-success mb-0">
+            <i class="bi bi-arrow-down-circle-fill me-2"></i>Stock In Movement
+        </h5>
+    </div>
+    <div class="content-card-body p-4">
+        <form method="POST" action="{{ url_for('inventory.stock_in') }}" novalidate>
+            <div class="row g-3">
+                <!-- Select Inventory Item -->
+                <div class="col-md-6">
+                    <label for="inventory_id" class="form-label">
+                        Select Product & Warehouse <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="inventory_id" name="inventory_id" required>
+                        <option value="">-- Choose Product in Warehouse --</option>
+                        {% for inv in inventory_list %}
+                        <option value="{{ inv.id }}" {% if inv.id == preselected_id %}selected{% endif %}>
+                            {{ inv.product.name }} (SKU: {{ inv.product.sku }}) — [{{ inv.warehouse.name }}] (Current: {{ inv.quantity }} {{ inv.product.unit }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Choose the target product stock item to increase.</div>
+                </div>
+
+                <!-- Quantity to Add -->
+                <div class="col-md-6">
+                    <label for="quantity" class="form-label">
+                        Quantity Received <span class="text-danger">*</span>
+                    </label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        id="quantity"
+                        name="quantity"
+                        min="1"
+                        placeholder="e.g. 50"
+                        required
+                        autofocus
+                    >
+                    <div class="form-text">Number of units arriving into the warehouse.</div>
+                </div>
+
+                <!-- Reference Code -->
+                <div class="col-md-6">
+                    <label for="reference" class="form-label">Reference Number / PO</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="reference"
+                        name="reference"
+                        placeholder="e.g., PO-2026-0891 or Shipment #12"
+                    >
+                    <div class="form-text">Purchase order number, invoice ref, or delivery challan ID.</div>
+                </div>
+
+                <!-- Performed By -->
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Performed By</label>
+                    <div class="form-control bg-light">
+                        <i class="bi bi-person-check me-2"></i>{{ current_user.username }} ({{ current_user.role | capitalize }})
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="col-12">
+                    <label for="notes" class="form-label">Notes / Remarks</label>
+                    <textarea
+                        class="form-control"
+                        id="notes"
+                        name="notes"
+                        rows="2"
+                        placeholder="Optional remarks about supplier, condition, or batch details..."
+                    ></textarea>
+                </div>
+
+                <div class="col-12">
+                    <hr class="my-3">
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success btn-action">
+                            <i class="bi bi-check-circle me-2"></i>Record Stock In
+                        </button>
+                        <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

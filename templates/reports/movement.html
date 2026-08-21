@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Movement Report{% endblock %}
+{% block page_title %}Stock Movement Report{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3 d-print-none">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('reports.index') }}">Reports</a></li>
+        <li class="breadcrumb-item active">Stock Movement Summary</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <div>
+        <h2>Stock Movement Summary</h2>
+        <p class="text-muted mb-0">Operational throughput analysis for inbound and outbound transactions</p>
+    </div>
+    <div class="d-print-none">
+        <button onclick="window.print()" class="btn btn-outline-dark">
+            <i class="bi bi-printer me-1"></i>Print Report
+        </button>
+    </div>
+</div>
+
+<!-- Time Window Filter & Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="p-3 bg-white border rounded-3 shadow-sm">
+            <span class="small text-muted text-uppercase fw-semibold d-block">Time Period</span>
+            <div class="d-print-none mt-2">
+                <div class="btn-group w-100" role="group">
+                    <a href="{{ url_for('reports.stock_movement', days=7) }}" class="btn btn-sm btn-outline-primary {% if days == 7 %}active{% endif %}">7 Days</a>
+                    <a href="{{ url_for('reports.stock_movement', days=30) }}" class="btn btn-sm btn-outline-primary {% if days == 30 %}active{% endif %}">30 Days</a>
+                    <a href="{{ url_for('reports.stock_movement', days=90) }}" class="btn btn-sm btn-outline-primary {% if days == 90 %}active{% endif %}">90 Days</a>
+                </div>
+            </div>
+            <span class="d-none d-print-block fw-bold fs-5">Last {{ days }} Days</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3 bg-success-subtle border border-success-subtle rounded-3 shadow-sm">
+            <span class="small text-success text-uppercase fw-semibold d-block">Total Stock Received (In)</span>
+            <h3 class="mb-0 fw-bold text-success">+{{ "{:,}".format(total_stock_in_qty) }} units</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-3 bg-danger-subtle border border-danger-subtle rounded-3 shadow-sm">
+            <span class="small text-danger text-uppercase fw-semibold d-block">Total Stock Dispatched (Out)</span>
+            <h3 class="mb-0 fw-bold text-danger">-{{ "{:,}".format(total_stock_out_qty) }} units</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction History Table -->
+<div class="content-card">
+    <div class="content-card-header">
+        <h5><i class="bi bi-clock-history me-2"></i>Movements Log (Last {{ days }} Days — {{ total_txns }} transactions)</h5>
+    </div>
+    <div class="content-card-body">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th>Product (SKU)</th>
+                        <th>Warehouse</th>
+                        <th>Quantity</th>
+                        <th>Reference</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                    <tr>
+                        <td class="small text-muted">{{ txn.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td>
+                            {% if txn.transaction_type == 'stock_in' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-arrow-down-circle-fill me-1"></i>Stock In
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                    <i class="bi bi-arrow-up-circle-fill me-1"></i>Stock Out
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="fw-semibold">{{ txn.inventory.product.name }}</span>
+                            <span class="sku-badge ms-1">{{ txn.inventory.product.sku }}</span>
+                        </td>
+                        <td><i class="bi bi-building me-1 text-muted"></i>{{ txn.inventory.warehouse.name }}</td>
+                        <td class="fw-bold {% if txn.transaction_type == 'stock_in' %}text-success{% else %}text-danger{% endif %}">
+                            {% if txn.transaction_type == 'stock_in' %}+{% else %}-{% endif %}{{ "{:,}".format(txn.quantity) }} {{ txn.inventory.product.unit }}
+                        </td>
+                        <td>{{ txn.reference or '—' }}</td>
+                        <td>{{ txn.user.username }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>No stock movements logged in the last {{ days }} days.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

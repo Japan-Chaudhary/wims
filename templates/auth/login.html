@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content_auth %}
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- Logo / Brand -->
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="bi bi-box-seam-fill"></i>
+            </div>
+            <h2>Welcome Back</h2>
+            <p class="text-muted">Sign in to your WIMS account</p>
+        </div>
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+            <!-- Username -->
+            <div class="mb-3">
+                <label for="username" class="form-label">
+                    <i class="bi bi-person me-1"></i>Username
+                </label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your username"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label for="password" class="form-label">
+                    <i class="bi bi-lock me-1"></i>Password
+                </label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="remember" name="remember" value="1">
+                <label class="form-check-label" for="remember">Remember me</label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-primary w-100 auth-btn">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Create one</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

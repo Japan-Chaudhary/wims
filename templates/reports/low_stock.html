@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Low Stock Reorder Report{% endblock %}
+{% block page_title %}Low Stock Reorder Report{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3 d-print-none">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('reports.index') }}">Reports</a></li>
+        <li class="breadcrumb-item active">Low Stock & Reorders</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <div>
+        <h2>Low Stock Reorder Report</h2>
+        <p class="text-muted mb-0">Items requiring procurement or stock replenishment</p>
+    </div>
+    <div class="d-print-none">
+        <button onclick="window.print()" class="btn btn-outline-dark">
+            <i class="bi bi-printer me-1"></i>Print Report
+        </button>
+    </div>
+</div>
+
+<!-- Summary Card -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="p-3 bg-danger text-white rounded-3 shadow-sm">
+            <span class="small text-uppercase fw-semibold d-block opacity-75">Items Needing Reorder</span>
+            <h2 class="mb-0 fw-bold">{{ items | length }} products</h2>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="p-3 bg-white border rounded-3 shadow-sm">
+            <span class="small text-muted text-uppercase fw-semibold d-block">Estimated Total Procurement Cost</span>
+            <h2 class="mb-0 fw-bold text-danger">${{ '%.2f' | format(total_reorder_cost) }}</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Table -->
+<div class="content-card">
+    <div class="content-card-body">
+        {% if items %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>SKU</th>
+                        <th>Warehouse</th>
+                        <th>Current Stock</th>
+                        <th>Min Threshold</th>
+                        <th>Suggested Reorder</th>
+                        <th>Est. Cost</th>
+                        <th class="text-end d-print-none">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="table-danger-subtle">
+                        <td class="fw-semibold">{{ item.product_name }}</td>
+                        <td><span class="sku-badge">{{ item.sku }}</span></td>
+                        <td><i class="bi bi-building me-1 text-muted"></i>{{ item.warehouse_name }}</td>
+                        <td class="fw-bold text-danger">{{ item.quantity }} {{ item.unit }}</td>
+                        <td>{{ item.min_stock }}</td>
+                        <td class="fw-bold text-success">+{{ item.suggested_reorder }} {{ item.unit }}</td>
+                        <td class="fw-semibold">${{ '%.2f' | format(item.estimated_reorder_cost) }}</td>
+                        <td class="text-end d-print-none">
+                            <a href="{{ url_for('inventory.stock_in', inventory_id=item.inventory_id) }}" class="btn btn-sm btn-success">
+                                <i class="bi bi-arrow-down-circle me-1"></i>Stock In
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light border-top">
+                    <tr>
+                        <th colspan="6" class="text-end">Total Estimated Reorder Cost:</th>
+                        <th class="fw-bold text-danger fs-6">${{ '%.2f' | format(total_reorder_cost) }}</th>
+                        <th class="d-print-none"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-check-circle text-success fs-1"></i>
+            <p class="mt-2 fw-semibold text-success">All inventory stock levels are healthy!</p>
+            <span class="text-muted">No items are currently below their minimum threshold.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
