@@ -11,7 +11,7 @@ from flask import Flask, render_template
 from flask_login import LoginManager
 from config import Config
 from database import mongo
-from utils import format_currency, format_quantity
+from utils import format_currency, format_quantity, format_datetime
 
 
 def create_app():
@@ -45,6 +45,7 @@ def create_app():
     # Register Jinja context filters
     app.jinja_env.filters['currency'] = format_currency
     app.jinja_env.filters['quantity'] = format_quantity
+    app.jinja_env.filters['datetime'] = format_datetime
 
     # 6. Register custom error handlers
     @app.errorhandler(404)

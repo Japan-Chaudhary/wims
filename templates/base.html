@@ -54,9 +54,33 @@
                 </a>
             </li>
             <li class="sidebar-nav-item">
-                <a href="{{ url_for('inventory.list_inventory') }}" class="sidebar-nav-link {% if request.endpoint and 'inventory' in request.endpoint and 'transactions' not in request.endpoint %}active{% endif %}">
+                <a href="{{ url_for('storage.list_zones') }}" class="sidebar-nav-link {% if request.endpoint and 'zones' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-diagram-3-fill"></i>
+                    <span>Zones</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('storage.list_storage') }}" class="sidebar-nav-link {% if request.endpoint and 'storage' in request.endpoint and 'reservations' not in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Storage Locations</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('storage.list_reservations') }}" class="sidebar-nav-link {% if request.endpoint and 'reservations' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-bookmark-check-fill"></i>
+                    <span>Reservations</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('inventory.list_inventory') }}" class="sidebar-nav-link {% if request.endpoint and 'inventory' in request.endpoint and 'transactions' not in request.endpoint and 'alerts' not in request.endpoint %}active{% endif %}">
                     <i class="bi bi-clipboard-data-fill"></i>
                     <span>Inventory</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('inventory.capacity_alerts') }}" class="sidebar-nav-link {% if request.endpoint and 'alerts' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>Capacity Alerts</span>
                 </a>
             </li>
             <li class="sidebar-nav-item">

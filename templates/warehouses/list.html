@@ -89,7 +89,7 @@
                         </td>
                         <td>
                             {% if wh.capacity %}
-                                {{ "{:,}".format(wh.capacity) }} units
+                                {{ "%.1f"|format(wh.capacity) }} <span class="badge bg-secondary">{{ wh.capacity_unit }}</span>
                             {% else %}
                                 <span class="text-muted">Unlimited</span>
                             {% endif %}

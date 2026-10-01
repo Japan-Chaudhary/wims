@@ -20,6 +20,7 @@ from bson import ObjectId
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import mongo
+from utils import to_ist
 
 
 class User(UserMixin):
@@ -55,7 +56,7 @@ class User(UserMixin):
 
     @property
     def created_at(self):
-        return self._doc.get('created_at')
+        return to_ist(self._doc.get('created_at'))
 
     # ---- Helpers ----
     def check_password(self, password):

@@ -75,7 +75,7 @@
                 <tbody>
                     {% for txn in transactions %}
                     <tr>
-                        <td class="small text-muted">{{ txn.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td class="small text-muted">{{ txn.created_at|datetime }}</td>
                         <td>
                             {% if txn.transaction_type == 'stock_in' %}
                                 <span class="badge bg-success-subtle text-success border border-success-subtle">

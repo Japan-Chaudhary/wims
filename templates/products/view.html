@@ -63,8 +63,12 @@
                         <span class="detail-value">{{ product.unit }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Created</span>
-                        <span class="detail-value">{{ product.created_at.strftime('%d %B %Y, %H:%M') }}</span>
+                        <span class="detail-label">Capacity Required / Unit</span>
+                        <span class="detail-value fw-bold text-info">{{ product.capacity_per_unit }} {{ product.capacity_unit }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Created (IST)</span>
+                        <span class="detail-value">{{ product.created_at|datetime }}</span>
                     </div>
                 </div>
             </div>
@@ -119,7 +123,7 @@
                         <th>Min Stock</th>
                         <th>Max Stock</th>
                         <th>Status</th>
-                        <th>Last Updated</th>
+                        <th>Last Updated (IST)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -140,7 +144,7 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td>{{ inv.last_updated.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td>{{ inv.last_updated|datetime }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

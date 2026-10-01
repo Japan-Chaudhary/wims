@@ -13,6 +13,7 @@ from routes.products import products_bp
 from routes.warehouses import warehouses_bp
 from routes.inventory import inventory_bp
 from routes.reports import reports_bp
+from routes.storage import storage_bp
 
 
 def register_blueprints(app):
@@ -23,3 +24,5 @@ def register_blueprints(app):
     app.register_blueprint(warehouses_bp)
     app.register_blueprint(inventory_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(storage_bp)
+

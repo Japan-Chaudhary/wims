@@ -42,6 +42,7 @@ def dashboard():
 
     # Total valuation: sum(quantity * unit_price)
     products_map = {p.id: p for p in Product.find_active()}
+    warehouses_map = {w.id: w for w in Warehouse.find_active()}
     total_valuation = sum(
         inv.quantity * products_map[inv.product_id].unit_price
         for inv in active_inv

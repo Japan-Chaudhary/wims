@@ -6,20 +6,26 @@ Warehouse helpers for MongoDB.
 Collection: 'warehouses'
 Document shape:
     {
-        _id:         ObjectId,
-        name:        str  (unique),
-        location:    str | None,
-        capacity:    int,
-        description: str | None,
-        is_active:   bool,
-        created_at:  datetime
+        _id:               ObjectId,
+        name:              str  (unique),
+        location:          str | None,
+        capacity:          float,
+        capacity_unit:     str,  # 'KG', 'Litres', 'Pieces', 'Boxes', 'Pallets', 'Cubic meters'
+        used_capacity:     float,
+        reserved_capacity: float,
+        description:       str | None,
+        is_active:         bool,
+        created_at:        datetime
     }
 """
 
 from datetime import datetime, timezone
 from bson import ObjectId
 from database import mongo
+from utils import to_ist
 import re
+
+CAPACITY_UNITS = ['KG', 'Litres', 'Pieces', 'Boxes', 'Pallets', 'Cubic meters']
 
 
 class Warehouse:
@@ -40,7 +46,27 @@ class Warehouse:
 
     @property
     def capacity(self):
-        return self._doc.get('capacity', 0)
+        return float(self._doc.get('capacity', 0.0))
+
+    @property
+    def max_capacity(self):
+        return float(self._doc.get('capacity', 0.0))
+
+    @property
+    def capacity_unit(self):
+        return self._doc.get('capacity_unit', 'Pieces')
+
+    @property
+    def used_capacity(self):
+        return float(self._doc.get('used_capacity', 0.0))
+
+    @property
+    def reserved_capacity(self):
+        return float(self._doc.get('reserved_capacity', 0.0))
+
+    @property
+    def available_capacity(self):
+        return max(0.0, self.capacity - (self.used_capacity + self.reserved_capacity))
 
     @property
     def description(self):
@@ -52,7 +78,7 @@ class Warehouse:
 
     @property
     def created_at(self):
-        return self._doc.get('created_at')
+        return to_ist(self._doc.get('created_at'))
 
     def __repr__(self):
         return f'<Warehouse {self.name}>'
@@ -85,11 +111,14 @@ class Warehouse:
         return [cls(d) for d in cursor]
 
     @classmethod
-    def create(cls, name, location=None, capacity=0, description=None):
+    def create(cls, name, location=None, capacity=0, capacity_unit='Pieces', description=None):
         doc = {
             'name': name,
             'location': location,
-            'capacity': capacity,
+            'capacity': float(capacity),
+            'capacity_unit': capacity_unit if capacity_unit in CAPACITY_UNITS else 'Pieces',
+            'used_capacity': 0.0,
+            'reserved_capacity': 0.0,
             'description': description,
             'is_active': True,
             'created_at': datetime.now(timezone.utc)
@@ -99,8 +128,11 @@ class Warehouse:
         return cls(doc)
 
     def update(self, **fields):
+        if 'capacity' in fields:
+            fields['capacity'] = float(fields['capacity'])
         self._col().update_one({'_id': self._doc['_id']}, {'$set': fields})
         self._doc.update(fields)
 
     def soft_delete(self):
         self.update(is_active=False)
+

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Capacity Alerts{% endblock %}
+{% block page_title %}Capacity Warning Alerts{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 text-light">Storage Capacity Alerts</h4>
+        <p class="text-muted small mb-0">Active warning & critical capacity alerts (Threshold: {{ threshold_pct }}%).</p>
+    </div>
+    <div>
+        <a href="{{ url_for('storage.list_storage') }}" class="btn btn-outline-secondary btn-sm me-2">Manage Locations</a>
+        <a href="{{ url_for('warehouses.list_warehouses') }}" class="btn btn-outline-secondary btn-sm">Manage Warehouses</a>
+    </div>
+</div>
+
+{% if alerts %}
+<div class="row g-3">
+    {% for alert in alerts %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-{{ 'danger' if alert.severity == 'CRITICAL' else 'warning' }} h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-{{ 'danger' if alert.severity == 'CRITICAL' else 'warning text-dark' }}">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ alert.severity }}
+                    </span>
+                    <span class="badge bg-dark font-monospace">{{ alert.type | upper }}</span>
+                </div>
+                <h5 class="card-title text-light mb-1">{{ alert.code if alert.code else alert.name }}</h5>
+                <p class="text-muted small mb-3">{{ alert.message }}</p>
+
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar bg-{{ 'danger' if alert.severity == 'CRITICAL' else 'warning' }}"
+                         role="progressbar" style="width: {{ alert.utilization_percentage }}%;"></div>
+                </div>
+                <div class="d-flex justify-content-between text-muted small font-monospace">
+                    <span>Used: {{ "%.1f"|format(alert.used_capacity + alert.reserved_capacity) }} {{ alert.capacity_unit }}</span>
+                    <span>Max: {{ "%.1f"|format(alert.max_capacity) }} {{ alert.capacity_unit }}</span>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end">
+                <a href="{{ url_for('storage.list_storage') }}" class="btn btn-sm btn-outline-light">View Storage</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card text-center py-5">
+    <div class="card-body">
+        <i class="bi bi-shield-check text-success display-1 mb-3"></i>
+        <h4 class="text-light">No Capacity Alerts</h4>
+        <p class="text-muted">All warehouses and storage locations are operating within healthy capacity thresholds (under {{ threshold_pct }}%).</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

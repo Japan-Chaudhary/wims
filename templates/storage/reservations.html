@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Capacity Reservations{% endblock %}
+{% block page_title %}Storage Capacity Reservations{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 text-light">Storage Reservations</h4>
+        <p class="text-muted small mb-0">Track and manage active capacity reservations in storage locations.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Reservation ID</th>
+                        <th>Location</th>
+                        <th>Warehouse</th>
+                        <th>Reserved Capacity</th>
+                        <th>Unit</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Created (IST)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reservations %}
+                    <tr>
+                        <td><span class="badge bg-dark font-monospace">{{ r.id[:8] }}...</span></td>
+                        <td><strong>{{ r.storage_location.code if r.storage_location else '—' }}</strong></td>
+                        <td>{{ r.warehouse.name if r.warehouse else '—' }}</td>
+                        <td><span class="text-warning fw-bold font-monospace">{{ "%.1f"|format(r.reserved_capacity) }}</span></td>
+                        <td><span class="badge bg-secondary">{{ r.capacity_unit }}</span></td>
+                        <td>
+                            {% if r.status == 'active' %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>Active</span>
+                            {% elif r.status == 'confirmed' %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Confirmed</span>
+                            {% else %}
+                            <span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-muted small">{{ r.notes or '—' }}</span></td>
+                        <td><span class="small text-muted">{{ r.created_at|datetime }}</span></td>
+                        <td>
+                            {% if r.status == 'active' %}
+                            <form method="POST" action="{{ url_for('storage.confirm_reservation', res_id=r.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success me-1">
+                                    <i class="bi bi-check-lg me-1"></i>Confirm
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('storage.cancel_reservation', res_id=r.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x-lg me-1"></i>Cancel
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">No capacity reservations found. Reserve space via Storage Locations.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

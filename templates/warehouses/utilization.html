@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ warehouse.name }} — Capacity Utilization{% endblock %}
+{% block page_title %}Warehouse Utilization Breakdown{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('warehouses.view_warehouse', warehouse_id=warehouse.id) }}" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="bi bi-arrow-left me-1"></i>Back to Warehouse
+    </a>
+    <h3 class="text-light mb-1">{{ warehouse.name }}</h3>
+    <p class="text-muted small mb-0">Location: {{ warehouse.location or 'N/A' }} | Capacity Unit: {{ warehouse.capacity_unit }}</p>
+</div>
+
+<!-- Overall Utilization Card -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Total Capacity</p>
+                <h3 class="text-light font-monospace mb-0">{{ "%.1f"|format(max_capacity) }}</h3>
+                <span class="badge bg-secondary mt-2">{{ warehouse.capacity_unit }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Used Capacity</p>
+                <h3 class="text-info font-monospace mb-0">{{ "%.1f"|format(used_capacity) }}</h3>
+                <span class="badge bg-info text-dark mt-2">Active Stock</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Reserved Capacity</p>
+                <h3 class="text-warning font-monospace mb-0">{{ "%.1f"|format(reserved_capacity) }}</h3>
+                <span class="badge bg-warning text-dark mt-2">Pending Hold</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <p class="text-muted small mb-1">Available Capacity</p>
+                <h3 class="text-success font-monospace mb-0">{{ "%.1f"|format(available_capacity) }}</h3>
+                <span class="badge bg-success mt-2">Free Space</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar Breakdown -->
+<div class="card mb-4">
+    <div class="card-header bg-transparent border-secondary">
+        <h5 class="card-title text-light mb-0">Overall Utilization Rate ({{ utilization_pct }}%)</h5>
+    </div>
+    <div class="card-body">
+        <div class="progress" style="height: 20px;">
+            {% set used_pct = (used_capacity / max_capacity * 100) if max_capacity > 0 else 0 %}
+            {% set res_pct = (reserved_capacity / max_capacity * 100) if max_capacity > 0 else 0 %}
+            <div class="progress-bar bg-info" role="progressbar" style="width: {{ used_pct }}%;" title="Used Capacity">Used: {{ used_pct|round(1) }}%</div>
+            <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: {{ res_pct }}%;" title="Reserved Capacity">Reserved: {{ res_pct|round(1) }}%</div>
+        </div>
+    </div>
+</div>
+
+<!-- Storage Locations Table -->
+<div class="card">
+    <div class="card-header bg-transparent border-secondary">
+        <h5 class="card-title text-light mb-0">Storage Locations Utilization</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Max Capacity</th>
+                        <th>Used</th>
+                        <th>Reserved</th>
+                        <th>Available</th>
+                        <th>Utilization</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loc in storage_locations %}
+                    <tr>
+                        <td><span class="badge bg-dark font-monospace">{{ loc.code }}</span></td>
+                        <td><strong>{{ loc.name }}</strong></td>
+                        <td>{{ "%.1f"|format(loc.max_capacity) }} {{ loc.capacity_unit }}</td>
+                        <td><span class="text-info font-monospace">{{ "%.1f"|format(loc.used_capacity) }}</span></td>
+                        <td><span class="text-warning font-monospace">{{ "%.1f"|format(loc.reserved_capacity) }}</span></td>
+                        <td><span class="text-success font-monospace">{{ "%.1f"|format(loc.available_capacity) }}</span></td>
+                        <td style="min-width: 140px;">
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                    <div class="progress-bar {% if loc.utilization_percentage >= 90 %}bg-danger{% elif loc.utilization_percentage >= 75 %}bg-warning{% else %}bg-success{% endif %}"
+                                         role="progressbar" style="width: {{ loc.utilization_percentage }}%;"></div>
+                                </div>
+                                <span class="small text-muted">{{ loc.utilization_percentage }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No storage locations registered for this warehouse.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

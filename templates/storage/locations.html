@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Storage Locations{% endblock %}
+{% block page_title %}Storage Location Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 text-light">Storage Locations</h4>
+        <p class="text-muted small mb-0">Manage capacity-based storage locations across warehouse zones.</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal">
+        <i class="bi bi-plus-lg me-2"></i>New Storage Location
+    </button>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('storage.list_storage') }}" class="row g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Search location code or name..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select name="warehouse_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Warehouses</option>
+                    {% for wh in warehouses %}
+                    <option value="{{ wh.id }}" {% if warehouse_filter == wh.id %}selected{% endif %}>{{ wh.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex">
+                <button type="submit" class="btn btn-secondary w-100 me-2">Filter</button>
+                <a href="{{ url_for('storage.list_storage') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Storage Locations Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Max Capacity</th>
+                        <th>Used Capacity</th>
+                        <th>Reserved</th>
+                        <th>Available</th>
+                        <th>Unit</th>
+                        <th>Utilization</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loc in locations %}
+                    {% set util = ((loc.used_capacity + loc.reserved_capacity) / loc.max_capacity * 100) if loc.max_capacity > 0 else 0 %}
+                    <tr>
+                        <td><span class="badge bg-dark font-monospace fs-6">{{ loc.code }}</span></td>
+                        <td><strong>{{ loc.name }}</strong></td>
+                        <td>{{ "%.1f"|format(loc.max_capacity) }}</td>
+                        <td><span class="text-info font-monospace">{{ "%.1f"|format(loc.used_capacity) }}</span></td>
+                        <td><span class="text-warning font-monospace">{{ "%.1f"|format(loc.reserved_capacity) }}</span></td>
+                        <td><span class="text-success font-monospace">{{ "%.1f"|format(loc.available_capacity) }}</span></td>
+                        <td><span class="badge bg-secondary">{{ loc.capacity_unit }}</span></td>
+                        <td style="min-width: 140px;">
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                    <div class="progress-bar {% if util >= 90 %}bg-danger{% elif util >= 75 %}bg-warning{% else %}bg-success{% endif %}"
+                                         role="progressbar" style="width: {{ util|round(1) }}%;"></div>
+                                </div>
+                                <span class="small text-muted">{{ util|round(1) }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning me-1" data-bs-toggle="modal" data-bs-target="#reserveModal{{ loc.id }}">
+                                <i class="bi bi-bookmark-plus me-1"></i>Reserve
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Reserve Modal for location -->
+                    <div class="modal fade" id="reserveModal{{ loc.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content text-start">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Reserve Capacity — Location {{ loc.code }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('storage.reserve_storage_capacity', loc_id=loc.id) }}">
+                                    <div class="modal-body">
+                                        <p class="text-muted small">Max: {{ loc.max_capacity }} {{ loc.capacity_unit }} | Available: {{ loc.available_capacity }} {{ loc.capacity_unit }}</p>
+                                        <div class="mb-3">
+                                            <label class="form-label">Reserved Capacity Amount ({{ loc.capacity_unit }})</label>
+                                            <input type="number" step="0.1" name="reserved_capacity" class="form-control" required max="{{ loc.available_capacity }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Notes / Reference</label>
+                                            <input type="text" name="notes" class="form-control" placeholder="e.g. Shipment arrival hold">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-warning">Confirm Reservation</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-muted">No storage locations found. Click "New Storage Location" to add one.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Storage Location -->
+<div class="modal fade" id="addLocationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Storage Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('storage.list_storage') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Location Name</label>
+                        <input type="text" name="name" class="form-control" required placeholder="e.g. Shelf A1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location Code</label>
+                        <input type="text" name="code" class="form-control" required placeholder="e.g. LOC-A1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Warehouse</label>
+                        <select name="warehouse_id" class="form-select" required>
+                            {% for wh in warehouses %}
+                            <option value="{{ wh.id }}">{{ wh.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Zone (Optional)</label>
+                        <select name="zone_id" class="form-select">
+                            <option value="">-- None --</option>
+                            {% for z in zones %}
+                            <option value="{{ z.id }}">{{ z.code }} - {{ z.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Max Capacity</label>
+                            <input type="number" step="0.1" name="max_capacity" class="form-control" required value="100.0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Capacity Unit</label>
+                            <select name="capacity_unit" class="form-select" required>
+                                {% for unit in capacity_units %}
+                                <option value="{{ unit }}">{{ unit }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Storage Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

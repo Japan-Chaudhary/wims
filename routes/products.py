@@ -1,12 +1,6 @@
-"""
-routes/products.py
-------------------
-Product management blueprint — full CRUD operations.
-"""
-
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required
-from models.product import Product
+from models.product import Product, CAPACITY_UNITS
 from utils import Pagination
 
 products_bp = Blueprint('products', __name__, url_prefix='/products')
@@ -61,6 +55,8 @@ def add_product():
         category = request.form.get('category', '').strip()
         unit_price = request.form.get('unit_price', 0, type=float)
         unit = request.form.get('unit', 'pcs').strip()
+        capacity_per_unit = request.form.get('capacity_per_unit', 1.0, type=float)
+        capacity_unit = request.form.get('capacity_unit', 'Pieces').strip()
         description = request.form.get('description', '').strip()
 
         errors = []
@@ -72,22 +68,26 @@ def add_product():
             errors.append(f'SKU "{sku}" already exists.')
         if unit_price < 0:
             errors.append('Unit price cannot be negative.')
+        if capacity_per_unit <= 0:
+            errors.append('Capacity per unit must be greater than zero.')
 
         if errors:
             for error in errors:
                 flash(error, 'danger')
-            return render_template('products/form.html', mode='add', product=None)
+            return render_template('products/form.html', mode='add', product=None, capacity_units=CAPACITY_UNITS)
 
         Product.create(
             name=name, sku=sku,
             category=category or None,
             unit_price=unit_price, unit=unit,
+            capacity_per_unit=capacity_per_unit,
+            capacity_unit=capacity_unit,
             description=description or None
         )
         flash(f'Product "{name}" created successfully!', 'success')
         return redirect(url_for('products.list_products'))
 
-    return render_template('products/form.html', mode='add', product=None)
+    return render_template('products/form.html', mode='add', product=None, capacity_units=CAPACITY_UNITS)
 
 
 # ---------------------------------------------------------------------------
@@ -131,6 +131,8 @@ def edit_product(product_id):
         category = request.form.get('category', '').strip()
         unit_price = request.form.get('unit_price', 0, type=float)
         unit = request.form.get('unit', 'pcs').strip()
+        capacity_per_unit = request.form.get('capacity_per_unit', 1.0, type=float)
+        capacity_unit = request.form.get('capacity_unit', 'Pieces').strip()
         description = request.form.get('description', '').strip()
 
         errors = []
@@ -144,22 +146,26 @@ def edit_product(product_id):
                 errors.append(f'SKU "{sku}" is already used by another product.')
         if unit_price < 0:
             errors.append('Unit price cannot be negative.')
+        if capacity_per_unit <= 0:
+            errors.append('Capacity per unit must be greater than zero.')
 
         if errors:
             for error in errors:
                 flash(error, 'danger')
-            return render_template('products/form.html', mode='edit', product=product)
+            return render_template('products/form.html', mode='edit', product=product, capacity_units=CAPACITY_UNITS)
 
         product.update(
             name=name, sku=sku,
             category=category or None,
             unit_price=unit_price, unit=unit,
+            capacity_per_unit=capacity_per_unit,
+            capacity_unit=capacity_unit,
             description=description or None
         )
         flash(f'Product "{name}" updated successfully!', 'success')
         return redirect(url_for('products.view_product', product_id=product.id))
 
-    return render_template('products/form.html', mode='edit', product=product)
+    return render_template('products/form.html', mode='edit', product=product, capacity_units=CAPACITY_UNITS)
 
 
 # ---------------------------------------------------------------------------
@@ -176,3 +182,4 @@ def delete_product(product_id):
     product.soft_delete()
     flash(f'Product "{product.name}" has been deleted.', 'success')
     return redirect(url_for('products.list_products'))
+

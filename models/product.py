@@ -6,22 +6,27 @@ Product helpers for MongoDB.
 Collection: 'products'
 Document shape:
     {
-        _id:         ObjectId,
-        name:        str,
-        sku:         str  (unique),
-        category:    str | None,
-        unit_price:  float,
-        unit:        str,
-        description: str | None,
-        is_active:   bool,
-        created_at:  datetime
+        _id:               ObjectId,
+        name:              str,
+        sku:               str  (unique),
+        category:          str | None,
+        unit_price:        float,
+        unit:              str,
+        capacity_per_unit: float,
+        capacity_unit:     str,  # 'KG', 'Litres', 'Pieces', 'Boxes', 'Pallets', 'Cubic meters'
+        description:       str | None,
+        is_active:         bool,
+        created_at:        datetime
     }
 """
 
 from datetime import datetime, timezone
 from bson import ObjectId
 from database import mongo
+from utils import to_ist
 import re
+
+CAPACITY_UNITS = ['KG', 'Litres', 'Pieces', 'Boxes', 'Pallets', 'Cubic meters']
 
 
 class Product:
@@ -46,11 +51,19 @@ class Product:
 
     @property
     def unit_price(self):
-        return self._doc.get('unit_price', 0.0)
+        return float(self._doc.get('unit_price', 0.0))
 
     @property
     def unit(self):
         return self._doc.get('unit', 'pcs')
+
+    @property
+    def capacity_per_unit(self):
+        return float(self._doc.get('capacity_per_unit', 1.0))
+
+    @property
+    def capacity_unit(self):
+        return self._doc.get('capacity_unit', 'Pieces')
 
     @property
     def description(self):
@@ -62,7 +75,7 @@ class Product:
 
     @property
     def created_at(self):
-        return self._doc.get('created_at')
+        return to_ist(self._doc.get('created_at'))
 
     def __repr__(self):
         return f'<Product {self.sku} - {self.name}>'
@@ -101,13 +114,16 @@ class Product:
         return [c for c in cls._col().distinct('category', {'is_active': True, 'category': {'$nin': [None, '']}}) if c]
 
     @classmethod
-    def create(cls, name, sku, category=None, unit_price=0.0, unit='pcs', description=None):
+    def create(cls, name, sku, category=None, unit_price=0.0, unit='pcs',
+               capacity_per_unit=1.0, capacity_unit='Pieces', description=None):
         doc = {
             'name': name,
             'sku': sku,
             'category': category,
-            'unit_price': unit_price,
+            'unit_price': float(unit_price),
             'unit': unit,
+            'capacity_per_unit': float(capacity_per_unit),
+            'capacity_unit': capacity_unit if capacity_unit in CAPACITY_UNITS else 'Pieces',
             'description': description,
             'is_active': True,
             'created_at': datetime.now(timezone.utc)
@@ -117,8 +133,13 @@ class Product:
         return cls(doc)
 
     def update(self, **fields):
+        if 'unit_price' in fields:
+            fields['unit_price'] = float(fields['unit_price'])
+        if 'capacity_per_unit' in fields:
+            fields['capacity_per_unit'] = float(fields['capacity_per_unit'])
         self._col().update_one({'_id': self._doc['_id']}, {'$set': fields})
         self._doc.update(fields)
 
     def soft_delete(self):
         self.update(is_active=False)
+

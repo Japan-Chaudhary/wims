@@ -59,8 +59,8 @@
                         </span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Created Date</span>
-                        <span class="detail-value">{{ warehouse.created_at.strftime('%d %B %Y') }}</span>
+                        <span class="detail-label">Created Date (IST)</span>
+                        <span class="detail-value">{{ warehouse.created_at|datetime }}</span>
                     </div>
                 </div>
 
@@ -107,13 +107,16 @@
                             <span class="small font-weight-bold">Capacity Utilization</span>
                             <span class="small font-monospace font-weight-bold">{{ utilization_pct }}%</span>
                         </div>
-                        <div class="progress" style="height: 10px;">
+                        <div class="progress mb-2" style="height: 10px;">
                             <div 
                                 class="progress-bar {% if utilization_pct > 90 %}bg-danger{% elif utilization_pct > 75 %}bg-warning{% else %}bg-success{% endif %}" 
                                 role="progressbar" 
                                 style="width: {{ utilization_pct }}%">
                             </div>
                         </div>
+                        <a href="{{ url_for('warehouses.get_warehouse_utilization', warehouse_id=warehouse.id) }}" class="btn btn-sm btn-outline-primary w-100 mt-1">
+                            <i class="bi bi-pie-chart-fill me-1"></i>Detailed Utilization Breakdown
+                        </a>
                     </div>
                     {% endif %}
                 </div>
@@ -139,7 +142,7 @@
                         <th>Quantity Stored</th>
                         <th>Min Stock Alert</th>
                         <th>Status</th>
-                        <th>Last Updated</th>
+                        <th>Last Updated (IST)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,8 +174,12 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td>{{ item.last_updated.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td>{{ item.last_updated|datetime }}</td>
                     </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
                     {% endfor %}
                 </tbody>
             </table>

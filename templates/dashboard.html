@@ -163,7 +163,7 @@
                                         <span class="text-muted">—</span>
                                     {% endif %}
                                 </td>
-                                <td class="small text-muted">{{ txn.created_at.strftime('%d %b, %H:%M') }}</td>
+                                <td class="small text-muted">{{ txn.created_at|datetime }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
