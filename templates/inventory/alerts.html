@@ -27,8 +27,20 @@
                     </span>
                     <span class="badge bg-dark font-monospace">{{ alert.type | upper }}</span>
                 </div>
-                <h5 class="card-title text-light mb-1">{{ alert.code if alert.code else alert.name }}</h5>
-                <p class="text-muted small mb-3">{{ alert.message }}</p>
+                <h5 class="card-title mb-1">
+                    {% if alert.type == 'storage_location' %}
+                        <a href="{{ url_for('storage.list_storage', warehouse_id=alert.warehouse_id) }}"
+                           class="text-dark fw-bold text-decoration-none hover-underline">
+                            {{ alert.code if alert.code else alert.name }}
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('warehouses.view_warehouse', warehouse_id=alert.id) }}"
+                           class="text-dark fw-bold text-decoration-none hover-underline">
+                            {{ alert.name }}
+                        </a>
+                    {% endif %}
+                </h5>
+                <p class="text-secondary small mb-3">{{ alert.message }}</p>
 
                 <div class="progress mb-2" style="height: 10px;">
                     <div class="progress-bar bg-{{ 'danger' if alert.severity == 'CRITICAL' else 'warning' }}"
@@ -40,7 +52,11 @@
                 </div>
             </div>
             <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end">
-                <a href="{{ url_for('storage.list_storage') }}" class="btn btn-sm btn-outline-light">View Storage</a>
+                {% if alert.type == 'storage_location' %}
+                    <a href="{{ url_for('storage.list_storage', warehouse_id=alert.warehouse_id) }}" class="btn btn-sm btn-outline-light">Manage Location</a>
+                {% else %}
+                    <a href="{{ url_for('warehouses.view_warehouse', warehouse_id=alert.id) }}" class="btn btn-sm btn-outline-light">View Warehouse</a>
+                {% endif %}
             </div>
         </div>
     </div>

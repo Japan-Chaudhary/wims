@@ -910,3 +910,8 @@ a:hover {
         border: 1px solid #ddd !important;
     }
 }
+
+/* Utility — hover underline for inline links */
+.hover-underline:hover {
+    text-decoration: underline !important;
+}
