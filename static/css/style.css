@@ -870,7 +870,13 @@ a:hover {
 /* =============================================================
    13. PRINT STYLES
    ============================================================= */
+@page {
+    size: A4 portrait;
+    margin: 15mm 12mm 15mm 12mm;
+}
+
 @media print {
+    /* Hide UI chrome */
     .sidebar,
     .top-navbar,
     .sidebar-overlay,
@@ -881,33 +887,100 @@ a:hover {
         display: none !important;
     }
 
+    /* Reset layout so content fills the A4 page */
+    html, body {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+    }
+
     .main-content {
         margin-left: 0 !important;
         padding: 0 !important;
+        width: 100% !important;
     }
 
     .content-wrapper {
         padding: 0 !important;
+        width: 100% !important;
     }
 
-    body {
-        background: #ffffff !important;
-        color: #000000 !important;
+    /* Ensure page-header prints nicely */
+    .page-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        margin-bottom: 12pt !important;
+        padding-bottom: 8pt !important;
+        border-bottom: 1.5pt solid #333 !important;
     }
 
+    /* Cards — remove shadows, keep borders */
+    .card,
     .content-card {
         box-shadow: none !important;
-        border: 1px solid #ddd !important;
+        border: 1pt solid #ccc !important;
+        break-inside: avoid !important;
     }
 
+    /* Summary row cards */
+    .row.g-3 .col-md-6 > div,
+    .row.g-3 .col-md-4 > div {
+        border: 1pt solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid !important;
+    }
+
+    /* Tables */
     .table {
         border-collapse: collapse !important;
+        width: 100% !important;
+        font-size: 9pt !important;
     }
 
-    .table th, .table td {
+    .table th,
+    .table td {
         background: #ffffff !important;
         color: #000000 !important;
-        border: 1px solid #ddd !important;
+        border: 0.5pt solid #aaa !important;
+        padding: 4pt 6pt !important;
+    }
+
+    .table thead th {
+        background: #f0f0f0 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Keep table rows together where possible */
+    .table tbody tr {
+        break-inside: avoid !important;
+    }
+
+    /* Badges / SKU */
+    .badge,
+    .sku-badge {
+        border: 0.5pt solid #555 !important;
+        color: #000 !important;
+        background: #f5f5f5 !important;
+        padding: 1pt 3pt !important;
+        font-size: 8pt !important;
+    }
+
+    /* Progress bars — not meaningful on paper, collapse */
+    .progress {
+        display: none !important;
+    }
+
+    /* Avoid orphaned headings */
+    h1, h2, h3, h4, h5, h6 {
+        break-after: avoid !important;
+    }
+
+    /* Table-responsive wrapper shouldn't overflow */
+    .table-responsive {
+        overflow: visible !important;
     }
 }
 
